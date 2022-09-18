@@ -69,7 +69,10 @@ class _LoginState extends State<Login> {
                 const SizedBox(
                   height: 20,
                 ),
-                ElevatedButton(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
                   onPressed: () async {
                     final rvalue =
                         await Authenticate(auth: widget.auth).signIn(
@@ -95,7 +98,7 @@ class _LoginState extends State<Login> {
                 const SizedBox(
                   height: 20,
                 ),
-                ElevatedButton(
+                OutlinedButton(
                   onPressed: () async {
                     final rvalue =
                         await Authenticate(auth: widget.auth).createAccount(
@@ -117,6 +120,8 @@ class _LoginState extends State<Login> {
                   },
                   child: const Text("Create Account"),
                 ),
+                  ],
+                )
               ],
             );
           }),

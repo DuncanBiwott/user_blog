@@ -1,11 +1,23 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:post_app/models/post.dart';
+import 'package:post_app/services/database.dart';
 
-class CreatePost extends StatelessWidget {
+class CreatePost extends StatefulWidget {
   CreatePost({Key? key}) : super(key: key);
+
+  @override
+  State<CreatePost> createState() => _CreatePostState();
+}
+
+class _CreatePostState extends State<CreatePost> {
   final TextEditingController title = TextEditingController();
+
   final TextEditingController content = TextEditingController();
+
+  final RemoteData data=RemoteData();
+  final date=DateTime.now().toString();
+
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -22,7 +34,11 @@ class CreatePost extends StatelessWidget {
                     width: 100,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        data.create(Post(name: "None", title:title.text.trim() , content: content.text.trim(), date: date));
+                        
+                      },
+                      style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
                       child: const Text("Post"),
                     ),
                   )
@@ -34,7 +50,7 @@ class CreatePost extends StatelessWidget {
                   hintText: "Title",
                 ),
               ),
-              SizedBox(height: 20,),
+              const SizedBox(height: 20,),
               TextFormField(
                 controller: content,
                 minLines: 1,
