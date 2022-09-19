@@ -18,39 +18,63 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  RemoteData data = RemoteData();
-  Future<List<Post>>? postList;
-   List<Post>? retrievedPostList;
+
+  CollectionReference post = FirebaseFirestore.instance.collection('posts');
+  List<String> documentId=[];
+
+
+  Future getDecId()async{
+    await FirebaseFirestore.instance.collection("posts").get()
+    .then((snapshot) => snapshot.docs.forEach((document) { 
+      documentId.add(document.reference.id);
+
+    }));
+
+  }
+
+  Future<void> updatePost(String docId) {
+  return post
+    .doc(docId)
+    .update({'company': 'Stokes and Sons'})
+    .then((value) => print("User Updated"))
+    .catchError((error) => print("Failed to update user: $error"));
+}
+
+Future<void> deletePost(String docId) {
+  return post
+    .doc(docId)
+    .delete()
+    .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content:  Text('Deleted Successfully'),
+    backgroundColor: Colors.red,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(24),
+    ),
+    margin: const EdgeInsets.only(
+        top: 5,
+        right: 20,
+        left: 20),
+  )))
+    .catchError((error) => print("Failed to delete user: $error"));
+}
+
 
   @override
   void initState() {
+    getDecId();
     super.initState();
-    _initRetrieval();
   }
 
-Future<void> _refresh()async {
-
-  setState(() async {
-    postList=data.retrieveposts();
-    retrievedPostList= await data.retrieveposts();
-    _initRetrieval();
-  });
-   
- }
-
-    Future<void> _initRetrieval() async {
-      postList = data.retrieveposts();
-      retrievedPostList= await data.retrieveposts();
-    }
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 90, 114, 134),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Todo App"),
+        title: const Text(""),
+        elevation: 0,
         actions: [
           IconButton(
             onPressed: () {
@@ -60,114 +84,18 @@ Future<void> _refresh()async {
           )
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: FutureBuilder(
-            future:postList ,
-            builder:(BuildContext context,AsyncSnapshot<List<Post>> snapshot) {
-              if(snapshot.hasData && snapshot.data!.isNotEmpty){
-                return ListView.builder(
-          itemCount: retrievedPostList!.length,
-          itemBuilder: (context, index)
-           {
-            
-         
-           return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  height: 300,
-                  width: 300,
-                  decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Text(retrievedPostList![index].name.toString(), style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),),
-                                 
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                retrievedPostList![index].title.toString(),
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          Text(retrievedPostList![index].date.toString(),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold))
-                        ],
-                      ),
-                       Text(
-                        retrievedPostList![index].content.toString(),
-                        style: const TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Home(
-                                          auth: widget.auth,
-                                          firestore: widget.firestore,
-                                        )),
-                              );
-                            },
-                            child: const Text("Read"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                            },
-                            style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromRGBO(255, 152, 0, 1))),
-                            child: const Text("Update"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                             data.deleteEmployee(retrievedPostList![index].name.toString());
-                            },
-                            style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.red)),
-                            child: const Text("Delete"),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              );
-        });
-              }
-              else {
-              return const Text("No data Found in the database ",style:TextStyle(fontSize: 32,fontWeight: FontWeight.bold),);
-              }
-            },
-            
-            ),
-      ),
+      body:FutureBuilder(
+        future: getDecId(),
+        builder:(context, snapshot) => 
+        ListView.builder(
+          itemCount: documentId.length,
+          itemBuilder: ((context, index) => 
+          GetPosts(documentId: documentId[index],)
+          ),
+        )
+         ) ,
            );
+      // ignore: dead_code
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -176,7 +104,7 @@ Future<void> _refresh()async {
           );
         },
         child: const Center(child: Icon(Icons.add)),
-        backgroundColor: const Color.fromARGB(255, 6, 98, 174),
+        backgroundColor:  Colors.black,
       );
     
   }

@@ -24,6 +24,9 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController _emailcontroller = TextEditingController();
   final TextEditingController _passwordcontroller = TextEditingController();
+  final TextEditingController _namecontroller = TextEditingController();
+
+
   
 
   @override
@@ -31,98 +34,104 @@ class _LoginState extends State<Login> {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(60),
+          padding: const EdgeInsets.all(20),
           child: Builder(builder: (BuildContext context) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: _emailcontroller,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.email),
-                    hintText: " Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(32.0)),
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("SIGNIN",style: TextStyle(color: Colors.blue,fontSize: 50),),
+            
+                   const SizedBox(
+                    height: 20,
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                TextFormField(
-                  controller: _passwordcontroller,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.lock),
-                    hintText: "Password",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                  TextFormField(
+                    controller: _emailcontroller,
+                    textAlign: TextAlign.start,
+                    keyboardType:TextInputType.emailAddress ,
+                    decoration: const InputDecoration(
+                      hintText: "Email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                     ),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                   ),
-                  obscureText: true,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    ElevatedButton(
-                  onPressed: () async {
-                    final rvalue =
-                        await Authenticate(auth: widget.auth).signIn(
-                      email: _emailcontroller.text,
-                      password: _passwordcontroller.text,
-                    );
-                    if (rvalue == "Success") {
-                      _emailcontroller.clear();
-                      _passwordcontroller.clear();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Home(auth:widget.auth, firestore: widget.firestore,)),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    controller: _passwordcontroller,
+                    textAlign: TextAlign.start,
+                    decoration: const InputDecoration(
+                      hintText: "Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(32.0)),
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                    ),
+                    obscureText: true,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                    onPressed: () async {
+                      final rvalue =
+                          await Authenticate(auth: widget.auth).signIn(
+                        email: _emailcontroller.text,
+                        password: _passwordcontroller.text,
                       );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(rvalue!)),
+                      if (rvalue == "Success") {
+                        _emailcontroller.clear();
+                        _passwordcontroller.clear();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Home(auth:widget.auth, firestore: widget.firestore)),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(rvalue!)),
+                        );
+                      }
+                    },
+                    child: const Text("Signin"),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  OutlinedButton(
+                    onPressed: () async {
+                      final rvalue =
+                          await Authenticate(auth: widget.auth).createAccount(
+                        email: _emailcontroller.text,
+                        password: _passwordcontroller.text,
                       );
-                    }
-                  },
-                  child: const Text("Signin"),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                OutlinedButton(
-                  onPressed: () async {
-                    final rvalue =
-                        await Authenticate(auth: widget.auth).createAccount(
-                      email: _emailcontroller.text,
-                      password: _passwordcontroller.text,
-                    );
-                    if (rvalue == "Success") {
-                      _emailcontroller.clear();
-                      _passwordcontroller.clear();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>  Home(auth: widget.auth,firestore: widget.firestore,)),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(rvalue!)),
-                      );
-                    }
-                  },
-                  child: const Text("Create Account"),
-                ),
-                  ],
-                )
-              ],
+                      if (rvalue == "Success") {
+                        _emailcontroller.clear();
+                        _passwordcontroller.clear();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>  Home(auth: widget.auth,firestore: widget.firestore,)),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(rvalue!)),
+                        );
+                      }
+                    },
+                    child: const Text("Create Account"),
+                  ),
+                    ],
+                  )
+                ],
+              ),
             );
           }),
         ),

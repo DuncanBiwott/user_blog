@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:post_app/models/post.dart';
 import 'package:post_app/services/database.dart';
 
 class CreatePost extends StatefulWidget {
@@ -10,12 +10,38 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
+   CollectionReference post = FirebaseFirestore.instance.collection('posts');
   final TextEditingController title = TextEditingController();
 
   final TextEditingController content = TextEditingController();
-
-  final RemoteData data=RemoteData();
   final date=DateTime.now().toString();
+
+  Future<void> addPost(){
+    return post
+          .add({
+            'name':"Null",
+            'title': title.text.trim(), 
+            'content': content.text.trim(), 
+            'date': date, 
+          })
+          .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: const Text('Added a Post'),
+    backgroundColor: Colors.green,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(24),
+    ),
+    margin: const EdgeInsets.only(
+        top: 5,
+        right: 20,
+        left: 20),
+  )))
+          // ignore: invalid_return_type_for_catch_error
+          .catchError((error) => print(error));
+    }
+    
+
+  
 
 
   @override
@@ -34,8 +60,11 @@ class _CreatePostState extends State<CreatePost> {
                     width: 100,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        data.create(Post(name: "None", title:title.text.trim() , content: content.text.trim(), date: date));
+                      onPressed: ()async {
+                        await addPost();
+
+                        Navigator.of(context).pop();
+                       
                         
                       },
                       style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.red)),
