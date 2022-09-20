@@ -94,8 +94,6 @@ Future<void> deletePost(String docId) {
           ),
         )
          ) ,
-           );
-      // ignore: dead_code
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -104,8 +102,8 @@ Future<void> deletePost(String docId) {
           );
         },
         child: const Center(child: Icon(Icons.add)),
-        backgroundColor:  Colors.black,
-      );
+        backgroundColor:  Colors.blue,
+      ) );
     
   }
 }

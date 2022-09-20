@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class GetPosts extends StatelessWidget {
   final String documentId;
 
-  const GetPosts({required this.documentId});
+  const GetPosts({super.key, required this.documentId});
 
   @override
   Widget build(BuildContext context) {
