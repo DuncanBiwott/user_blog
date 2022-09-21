@@ -1,16 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:post_app/models/post.dart';
 import 'package:post_app/services/auth.dart';
-import 'package:post_app/services/database.dart';
 import 'package:post_app/view/create_post.dart';
 
 class Home extends StatefulWidget {
   final FirebaseAuth auth;
   final FirebaseFirestore firestore;
 
-  Home({Key? key, required this.auth, required this.firestore})
+ const  Home({Key? key, required this.auth, required this.firestore})
       : super(key: key);
 
   @override
@@ -21,31 +19,91 @@ class _HomeState extends State<Home> {
 
   CollectionReference post = FirebaseFirestore.instance.collection('posts');
   List<String> documentId=[];
+  final TextEditingController title = TextEditingController();
+
+  final TextEditingController content = TextEditingController();
 
 
-  Future getDecId()async{
+  Future getDocId()async{
     await FirebaseFirestore.instance.collection("posts").get()
     .then((snapshot) => snapshot.docs.forEach((document) { 
       documentId.add(document.reference.id);
+
+       
 
     }));
 
   }
 
-  Future<void> updatePost(String docId) {
-  return post
-    .doc(docId)
-    .update({'company': 'Stokes and Sons'})
-    .then((value) => print("User Updated"))
-    .catchError((error) => print("Failed to update user: $error"));
-}
 
-Future<void> deletePost(String docId) {
+  Future<void>_update(DocumentSnapshot? documentSnapshot)async{
+    if(documentSnapshot!=null){
+      title.text=documentSnapshot["title"];
+      content.text=documentSnapshot["content"];
+    }
+    await showModalBottomSheet(
+      isScrollControlled: true,
+        context: context,
+        builder: (BuildContext ctx){
+        return Padding(
+            padding: EdgeInsets.only(
+              top: 20,
+              left: 20,
+              right: 20,
+
+              bottom: MediaQuery.of(ctx).viewInsets.bottom+20
+
+            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: title,
+                decoration: const InputDecoration(
+                  labelText: "Title",
+                ),
+              ),
+              TextField(
+                controller: content,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+                decoration: const InputDecoration(
+                  labelText: "Update Post",
+                ),
+              ),
+             const SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  onPressed:()async{
+                    final String myTitle=title.text;
+                    final String task=content.text;
+
+                    await post.doc(documentSnapshot!.id)
+                    .update({"title":myTitle,"content":task});
+                    title.clear();
+                    content.clear();
+
+              },
+                  child:const  Text("Update")
+              )
+            ],
+          ),
+        );
+
+        });
+
+
+
+  }
+
+Future<void> _deletePost(DocumentSnapshot? documentSnapshot) {
   return post
-    .doc(docId)
+    .doc(documentSnapshot!.id)
     .delete()
     .then((value) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content:  Text('Deleted Successfully'),
+    content: const Text('Deleted Successfully'),
     backgroundColor: Colors.red,
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(
@@ -62,8 +120,8 @@ Future<void> deletePost(String docId) {
 
   @override
   void initState() {
-    getDecId();
     super.initState();
+    getDocId();
   }
 
 
@@ -73,7 +131,7 @@ Future<void> deletePost(String docId) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(""),
+        title: const Text("Home Page"),
         elevation: 0,
         actions: [
           IconButton(
@@ -84,16 +142,107 @@ Future<void> deletePost(String docId) {
           )
         ],
       ),
-      body:FutureBuilder(
-        future: getDecId(),
-        builder:(context, snapshot) => 
-        ListView.builder(
-          itemCount: documentId.length,
-          itemBuilder: ((context, index) => 
-          GetPosts(documentId: documentId[index],)
-          ),
-        )
-         ) ,
+      body:StreamBuilder(
+        stream: post.snapshots(),
+        builder: (context,AsyncSnapshot<QuerySnapshot>streamsnapshot){
+          if(streamsnapshot.hasData){
+            return ListView.builder(
+                itemCount: streamsnapshot.data!.docs.length,
+                itemBuilder: (context,index){
+                  final DocumentSnapshot documentSnapshot=streamsnapshot.data!.docs[index];
+                  return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 300,
+                    width: 300,
+                    decoration: BoxDecoration(
+                        color: Colors.grey,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        
+                           Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const CircleAvatar(backgroundColor: Colors.white,radius: 32,),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('By ${documentSnapshot["name"]}', style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),),
+                                     
+                                  const SizedBox(
+                                    height: 1,
+                                  ),
+                                  Text(
+                                    documentSnapshot["title"],
+                                    style: const TextStyle(
+                                      fontSize: 32,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                          
+                            ],
+                          ),
+                        
+                        const Divider(height: 1,color: Colors.grey,),
+                         Text(
+                          documentSnapshot["content"],
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                        ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                
+                              },
+                              child: const Text("Read"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                _update(documentSnapshot);
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(
+                                      const Color.fromARGB(232, 187, 0, 255))),
+                              child: const Icon(Icons.edit),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                _deletePost(documentSnapshot);
+                               
+                              },
+                              style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.red)),
+                              child: const Icon(Icons.delete),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+                }
+            );
+
+          }
+          return const Center(
+            child:  CircularProgressIndicator(),
+          );
+
+        }
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
@@ -101,8 +250,8 @@ Future<void> deletePost(String docId) {
             MaterialPageRoute(builder: (context) => CreatePost()),
           );
         },
-        child: const Center(child: Icon(Icons.add)),
         backgroundColor:  Colors.blue,
+        child: const Center(child: Icon(Icons.add)),
       ) );
     
   }

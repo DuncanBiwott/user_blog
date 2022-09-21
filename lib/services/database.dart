@@ -1,27 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class GetPosts extends StatelessWidget {
+class GetPosts extends StatefulWidget {
   final String documentId;
 
   const GetPosts({super.key, required this.documentId});
 
   @override
+  State<GetPosts> createState() => _GetPostsState();
+}
+
+class _GetPostsState extends State<GetPosts> {
+  CollectionReference users = FirebaseFirestore.instance.collection('posts');
+  @override
   Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('posts');
+    
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-        future: users.doc(documentId).get(),
+        future: users.doc(widget.documentId).get(),
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
     
           if (snapshot.hasError) {
-            return const Text("Something went wrong");
+            print("There is Error in Connection");
+            return const Center(
+              
+              child: CircularProgressIndicator(),
+            );
           }
     
           if (snapshot.hasData && !snapshot.data!.exists) {
-            return const Text("Document does not exist");
+            print("No Data");
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           }
     
           if (snapshot.connectionState == ConnectionState.done) {
@@ -29,7 +42,7 @@ class GetPosts extends StatelessWidget {
             return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     height: 300,
                     width: 300,
                     decoration: BoxDecoration(
@@ -39,32 +52,34 @@ class GetPosts extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              children: [
-                                Text('${data["name"]}', style: const TextStyle(
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                children: [
+                                  Text('${data["name"]}', style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),),
+                                     
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Text(
+                                    '${data["title"]}',
+                                    style: const TextStyle(
+                                      fontSize: 32,
                                         color: Colors.white,
-                                        fontWeight: FontWeight.bold),),
-                                   
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  '${data["title"]}',
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              Text('${data["date"]}',
                                   style: const TextStyle(
-                                    fontSize: 32,
                                       color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            Text('${data["date"]}',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold))
-                          ],
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
                         ),
                          Text(
                           '${data["content"]}',
@@ -87,7 +102,7 @@ class GetPosts extends StatelessWidget {
                               },
                               style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(
-                                      Color.fromARGB(232, 187, 0, 255))),
+                                      const Color.fromARGB(232, 187, 0, 255))),
                               child: const Text("Update"),
                             ),
                             ElevatedButton(

@@ -77,6 +77,7 @@ class _CreatePostState extends State<CreatePost> {
                 controller: title,
                 decoration: const InputDecoration(
                   hintText: "Title",
+                
                 ),
               ),
               const SizedBox(
@@ -86,7 +87,7 @@ class _CreatePostState extends State<CreatePost> {
                 controller: content,
                 minLines: 1,
                 decoration: const InputDecoration(
-                  hintText: "Post Something here .....",
+                  hintText: "Say Something here .....",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   ),
