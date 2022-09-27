@@ -2,6 +2,7 @@
 
 // ignore: unused_import
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:post_app/view/home_page.dart';
@@ -26,7 +27,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final TextEditingController _emailcontroller = TextEditingController();
   final TextEditingController _passwordcontroller = TextEditingController();
-  final TextEditingController _namecontroller = TextEditingController();
+  
 
 
   
@@ -77,6 +78,8 @@ class _LoginState extends State<Login> {
                           EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                     ),
                     obscureText: true,
+                    validator: (email) => !EmailValidator.validate(email!) ?
+                  "Enter Valid Email":null,
                   ),
                   const SizedBox(
                     height: 20,

@@ -50,4 +50,16 @@ class Authenticate {
       rethrow;
     }
   }
+  Future resetPassword({ required String email})async{
+    try{
+      await auth.sendPasswordResetEmail(email: email);
+      return "Success";
+
+
+    }on FirebaseAuthException catch(e){
+      return e.message;
+    }catch(e){
+      rethrow;
+    }
+  }
 }
