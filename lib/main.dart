@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: Colors.green,
-        fontFamily: 'Raleway'
+        fontFamily: 'Raleway',
       ),
       home: Root(),
     );
